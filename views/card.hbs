@@ -19,6 +19,8 @@
             {{/each}}
         </table>
         <p><strong>Цена: <span class="price">{{price}}</span></strong></p>
+
+        <form action="/orders" method="POST"><button type="submit" class="btn">Оформить заказ</button></form>
     {{else}}
         <h1>Корзина пуста</h1>
     {{/if}}
