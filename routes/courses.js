@@ -2,17 +2,21 @@ const { Router } = require('express');
 const Course = require('../models/course-model');
 const router = Router();
 
+// Получить все
 router.get('/', async (req, res) => {
-    const courses = await Course.getAll();
+    const courses = await Course.find()
+        .populate('userId', 'email name')
+        .select('price title img');
     res.render('courses', {
-        title: 'Courses',
+        title: 'Курсы',
         isCourses: true,
         courses,
-    });
+    })
 });
 
+// Получить 1
 router.get('/:id', async (req, res) => {
-    const course = await Course.getById(req.params.id);
+    const course = await Course.findById(req.params.id);
     res.render('course', {
         layout: 'empty',
         title: course.title,
@@ -20,23 +24,38 @@ router.get('/:id', async (req, res) => {
     });
 });
 
+// Редактировать 1
 router.get('/:id/edit', async (req, res) => {
     if (!req.query.allow) {
         return res.redirect('/');
     }
-    const course = await Course.getById(req.params.id);
+    const course = await Course.findById(req.params.id);
     res.render('edit', {
         title: course.title,
         course,
     });
 });
 
+// Пост запрос для сохранения редактирвоания
 router.post('/edit', async (req, res) => {
-    console.log('req.params', req.body);
-    const course = new Course(req.body.title, req.body.price, req.body.img, req.body.id);
-    await course.update(req.body);
-
+    const { id } = req.body;
+    delete req.body.id;
+    await Course.findByIdAndUpdate(id, req.body);
     res.redirect('/courses')
+});
+
+// Удаление курса
+router.post('/remove', async (req, res) => {
+    try {
+        await Course.deleteOne({
+            _id: req.body.id
+        });
+        res.redirect('/courses');
+    }
+    catch (e) {
+        console.log(e);
+    }
+
 });
 
 module.exports = router;
