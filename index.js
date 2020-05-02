@@ -7,6 +7,8 @@ const mongoose = require('mongoose');
 const session = require('express-session');
 const MongoStore = require('connect-mongodb-session')(session);
 
+const keys = require('./keys/index');
+
 // Подключаем роуты
 const homeRoutes = require('./routes/home');
 const coursesRoutes = require('./routes/courses');
@@ -24,15 +26,14 @@ const User = require('./models/user-model')
 
 const app = express();
 
-const MONGODB_URI = `mongodb://localhost:27017/node-express`;
-
 const hbs = exphbs.create({
     defaultLayout: 'main',
     extname: 'hbs',
+    helpers: require('./utils/hbs-helpers'),
 });
 const store = new MongoStore({
     collection: 'sessions',
-    uri: MONGODB_URI,
+    uri: keys.MONGODB_URI,
 });
 
 app.engine('hbs', hbs.engine);
@@ -41,7 +42,7 @@ app.set('views', 'views');
 
 // middleware
 app.use(session({
-    secret: 'some secret value',
+    secret: keys.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
     store,
@@ -67,7 +68,7 @@ const PORT = process.env.PORT || 3123;
 
 async function start() {
     try {
-        await mongoose.connect(MONGODB_URI, {
+        await mongoose.connect(keys.MONGODB_URI, {
             useNewUrlParser: true,
             useUnifiedTopology: true,
             useFindAndModify: true,
