@@ -16,10 +16,13 @@ const addRoutes = require('./routes/add');
 const cardRoutes = require('./routes/card');
 const ordersRoutes = require('./routes/orders');
 const authRoutes = require('./routes/auth');
+const profileRoutes = require('./routes/profile');
 
 // Мидлвейры
 const varMiddleware = require('./middleware/variables');
 const userMiddleware = require('./middleware/user');
+const errorHandler = require('./middleware/error');
+const fileMiddleware = require('./middleware/file');
 
 // Models
 const User = require('./models/user-model')
@@ -47,6 +50,7 @@ app.use(session({
     saveUninitialized: false,
     store,
 }));
+app.use(fileMiddleware.single('avatar'));
 app.use(flash());
 app.use(varMiddleware);
 app.use(userMiddleware);
@@ -63,6 +67,9 @@ app.use('/add', addRoutes);
 app.use('/card', cardRoutes);
 app.use('/orders', ordersRoutes);
 app.use('/auth', authRoutes);
+app.use('/profile', profileRoutes);
+
+app.use(errorHandler);
 
 const PORT = process.env.PORT || 3123;
 
